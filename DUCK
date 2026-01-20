@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Insight | Análise Comportamental</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6C5CE7;
+            --secondary: #A29BFE;
+            --background: #0F0F12;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --text-main: #FFFFFF;
+            --text-muted: #B2BEC3;
+            --accent: #FDCB6E; /* Amarelo Pato */
+            --banana: #FFEAA7;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background);
+            color: var(--text-main);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(108, 92, 231, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(253, 203, 110, 0.05) 0%, transparent 20%);
+        }
+
+        /* --- UI Elements --- */
+        .container {
+            text-align: center;
+            z-index: 10;
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            padding: 20px;
+        }
+
+        h1 {
+            font-weight: 800;
+            font-size: 3rem;
+            letter-spacing: -1px;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #fff 0%, #a29bfe 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeUp 0.8s ease forwards;
+        }
+
+        p.subtitle {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            margin-bottom: 3rem;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeUp 0.8s ease 0.2s forwards;
+        }
+
+        .btn-main {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 16px 40px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 10px 20px -5px rgba(108, 92, 231, 0.4);
+            opacity: 0;
+            animation: fadeUp 0.8s ease 0.4s forwards;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-main:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 15px 30px -5px rgba(108, 92, 231, 0.5);
+        }
+
+        .btn-main:active {
+            transform: translateY(1px);
+        }
+
+        /* --- Loader UI --- */
+        .loader-container {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .progress-bar {
+            width: 200px;
+            height: 4px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary);
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+
+        .status-text {
+            margin-top: 10px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* --- The Reveal Stage --- */
+        .reveal-stage {
+            display: none; /* Ativado via JS */
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+            height: 100%;
+            pointer-events: none; /* Para não bloquear cliques se necessário */
+        }
+
+        /* --- The Modern Duck (SVG Styles) --- */
+        .duck-container {
+            position: absolute;
+            bottom: -300px; /* Começa fora */
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 300px;
+            z-index: 20;
+            filter: drop-shadow(0 20px 30px rgba(0,0,0,0.5));
+            transition: bottom 1.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .duck-container.active {
+            bottom: 20%;
+        }
+
+        .duck-svg {
+            width: 100%;
+            height: 100%;
+            overflow: visible;
+        }
+
+        .duck-body { fill: var(--accent); }
+        .duck-wing { fill: #FDCB6E; filter: brightness(0.9); }
+        .duck-beak { fill: #FF7675; }
+        .duck-eye { fill: #2D3436; }
+        .duck-eye-white { fill: white; }
+        .duck-leg { fill: #FF7675; }
+
+        /* Animação do Pato Respirando/Flutuando */
+        .duck-group {
+            animation: float 3s ease-in-out infinite;
+            transform-origin: bottom center;
+        }
+
+        /* --- The Card/Sign --- */
+        .message-card {
+            position: absolute;
+            top: 0;
+            right: -140px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 20px 30px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            color: #2D3436;
+            width: 280px;
+            opacity: 0;
+            transform: scale(0.8) rotate(-10deg);
+            transform-origin: bottom left;
+            transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transition-delay: 1.6s; /* Espera o pato subir */
+        }
+
+        .message-card.show {
+            opacity: 1;
+            transform: scale(1) rotate(0deg);
+            right: -160px;
+        }
+
+        .message-card h2 {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--primary);
+            margin-bottom: 5px;
+        }
+
+        .message-card .verdict {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #2D3436;
+            line-height: 1.1;
+        }
+        
+        .banana-icon {
+            font-size: 2rem;
+            vertical-align: middle;
+            animation: bounce 1s infinite;
+            display: inline-block;
+        }
+
+        /* --- Particles Canvas --- */
+        #confetti-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        /* --- Utilities --- */
+        .hidden { display: none !important; }
+        .fade-out { opacity: 0; pointer-events: none; transition: opacity 0.5s ease; }
+
+        @keyframes fadeUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(1deg); }
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        /* Responsividade */
+        @media (max-width: 600px) {
+            h1 { font-size: 2rem; }
+            .message-card {
+                right: auto;
+                left: 50%;
+                top: -120px;
+                transform: translateX(-50%) scale(0.8);
+                width: 250px;
+            }
+            .message-card.show {
+                transform: translateX(-50%) scale(1);
+                right: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Background Canvas for Particles -->
+    <canvas id="confetti-canvas"></canvas>
+
+    <div class="container">
+        <!-- Tela Inicial -->
+        <div id="intro-screen">
+            <h1>O Algoritmo da Verdade</h1>
+            <p class="subtitle">Utilizando redes neurais para analisar sua aura digital.</p>
+            <button class="btn-main" onclick="iniciarAnalise()">Descobrir Minha Essência</button>
+        </div>
+
+        <!-- Tela de Carregamento -->
+        <div id="loading-screen" class="loader-container">
+            <div class="status-text" id="status-text">Iniciando conexão...</div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- O Palco da Revelação -->
+    <div class="reveal-stage" id="reveal-stage">
+        <div class="duck-container" id="duck">
+            <!-- Pato Vetorial Elegante -->
+            <svg class="duck-svg" viewBox="0 0 200 300" xmlns="http://www.w3.org/2000/svg">
+                <g class="duck-group">
+                    <!-- Pernas -->
+                    <path class="duck-leg" d="M85 240 L85 270 L70 280 M115 240 L115 270 L130 280" stroke="#FF7675" stroke-width="8" stroke-linecap="round"/>
+                    
+                    <!-- Corpo -->
+                    <ellipse class="duck-body" cx="100" cy="180" rx="70" ry="60" />
+                    
+                    <!-- Cabeça -->
+                    <circle class="duck-body" cx="100" cy="100" r="50" />
+                    
+                    <!-- Bico -->
+                    <path class="duck-beak" d="M140 100 Q170 100 160 120 Q130 130 120 110" />
+                    
+                    <!-- Olho -->
+                    <circle class="duck-eye" cx="115" cy="90" r="6" />
+                    <circle class="duck-eye-white" cx="117" cy="88" r="2" />
+                    
+                    <!-- Asa -->
+                    <path class="duck-wing" d="M60 170 Q100 140 130 170 Q100 210 60 170" />
+                    
+                    <!-- Brilho no topo da cabeça -->
+                    <path fill="rgba(255,255,255,0.2)" d="M80 70 Q100 60 120 70" />
+                </g>
+            </svg>
+
+            <!-- A Placa Modernosa -->
+            <div class="message-card" id="message-card">
+                <h2>Resultado da Análise</h2>
+                <div class="verdict">
+                    Você é um<br>
+                    <span style="color: #6C5CE7;">BANANA</span>
+                    <span class="banana-icon">🍌</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Lógica de Estado e Animação ---
+        
+        function iniciarAnalise() {
+            const intro = document.getElementById('intro-screen');
+            const loader = document.getElementById('loading-screen');
+            const progress = document.getElementById('progress-fill');
+            const status = document.getElementById('status-text');
+            const btn = document.querySelector('.btn-main');
+
+            // 1. Fade out da intro
+            intro.classList.add('fade-out');
+            
+            setTimeout(() => {
+                intro.style.display = 'none';
+                loader.style.display = 'flex';
+                
+                // 2. Simulação de processamento complexo
+                simularCarregamento(progress, status, () => {
+                    // 3. Fim do carregamento, mostrar o pato
+                    loader.classList.add('fade-out');
+                    setTimeout(() => {
+                        loader.style.display = 'none';
+                        revelarPato();
+                    }, 500);
+                });
+            }, 500);
+        }
+
+        function simularCarregamento(bar, textEl, callback) {
+            let width = 0;
+            const steps = [
+                { w: 20, t: "Calibrando sensores..." },
+                { w: 45, t: "Escaneando histórico de decisões..." },
+                { w: 60, t: "Detectando níveis de potássio..." },
+                { w: 80, t: "Compilando veredito..." },
+                { w: 100, t: "Análise concluída." }
+            ];
+
+            let stepIndex = 0;
+
+            const interval = setInterval(() => {
+                if (width >= 100) {
+                    clearInterval(interval);
+                    setTimeout(callback, 500);
+                } else {
+                    // Lógica para avançar de forma não linear
+                    if (stepIndex < steps.length && width >= steps[stepIndex].w) {
+                        textEl.innerText = steps[stepIndex].t;
+                        stepIndex++;
+                    }
+                    width += Math.random() * 2;
+                    if(width > 100) width = 100;
+                    bar.style.width = width + '%';
+                }
+            }, 50);
+        }
+
+        function revelarPato() {
+            const stage = document.getElementById('reveal-stage');
+            const duck = document.getElementById('duck');
+            const card = document.getElementById('message-card');
+            
+            stage.style.display = 'block';
+            
+            // Pequeno delay para renderizar
+            setTimeout(() => {
+                duck.classList.add('active');
+                
+                // Disparar confetes quando o cartão aparecer
+                setTimeout(() => {
+                    card.classList.add('show');
+                    triggerConfetti();
+                }, 1600);
+            }, 100);
+        }
+
+        // --- Sistema de Partículas (Confetti) Minimalista ---
+        const canvas = document.getElementById('confetti-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Particle {
+            constructor() {
+                this.x = canvas.width / 2; // Começa no centro (atrás do pato)
+                this.y = canvas.height * 0.8;
+                this.vx = (Math.random() - 0.5) * 20;
+                this.vy = (Math.random() - 2) * 20 - 10;
+                this.gravity = 0.5;
+                this.color = `hsl(${Math.random() * 360}, 100%, 60%)`;
+                this.size = Math.random() * 8 + 4;
+                this.rotation = Math.random() * 360;
+                this.rotationSpeed = (Math.random() - 0.5) * 10;
+                this.life = 1.0;
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.vy += this.gravity;
+                this.rotation += this.rotationSpeed;
+                this.life -= 0.01;
+            }
+
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.rotation * Math.PI / 180);
+                ctx.fillStyle = this.color;
+                ctx.globalAlpha = this.life;
+                ctx.fillRect(-this.size/2, -this.size/2, this.size, this.size);
+                ctx.restore();
+            }
+        }
+
+        function triggerConfetti() {
+            for(let i=0; i<150; i++) {
+                particles.push(new Particle());
+            }
+            animateConfetti();
+        }
+
+        function animateConfetti() {
+            if(particles.length === 0) return;
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            for(let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.update();
+                p.draw();
+                
+                if(p.life <= 0 || p.y > canvas.height) {
+                    particles.splice(i, 1);
+                }
+            }
+            
+            requestAnimationFrame(animateConfetti);
+        }
+
+    </script>
+</body>
+</html>
