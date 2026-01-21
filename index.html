@@ -63,10 +63,46 @@
         p.subtitle {
             color: var(--text-muted);
             font-size: 1.1rem;
-            margin-bottom: 3rem;
+            margin-bottom: 2rem;
             opacity: 0;
             transform: translateY(20px);
             animation: fadeUp 0.8s ease 0.2s forwards;
+        }
+
+        /* Input Styles */
+        .name-input {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50px;
+            padding: 15px 25px;
+            font-family: 'Inter', sans-serif;
+            font-size: 1.1rem;
+            color: white;
+            width: 100%;
+            max-width: 320px;
+            margin-bottom: 25px;
+            outline: none;
+            transition: all 0.3s ease;
+            text-align: center;
+            opacity: 0;
+            animation: fadeUp 0.8s ease 0.3s forwards;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .name-input:focus {
+            border-color: var(--primary);
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0 15px rgba(108, 92, 231, 0.3);
+        }
+
+        .name-input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .shake {
+            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
         }
 
         .btn-main {
@@ -93,6 +129,27 @@
 
         .btn-main:active {
             transform: translateY(1px);
+        }
+
+        /* Botão de Tentar Novamente */
+        .btn-retry {
+            background: transparent;
+            border: 1px solid rgba(108, 92, 231, 0.3);
+            color: var(--secondary);
+            padding: 10px 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border-radius: 20px;
+            margin-top: 15px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            width: 100%;
+        }
+
+        .btn-retry:hover {
+            background: rgba(108, 92, 231, 0.1);
+            color: white;
+            border-color: var(--primary);
         }
 
         /* --- Loader UI --- */
@@ -156,6 +213,23 @@
             bottom: 20%;
         }
 
+        /* --- ESTADOS ESPECIAIS (RAGE QUIT) --- */
+        
+        /* 1. Zoom na cara (Encarada) */
+        .duck-container.rage-zoom {
+            transform: translateX(-50%) scale(3.5) !important;
+            bottom: -50px !important; /* Ajuste para focar na cara e não no peito */
+            z-index: 100;
+            /* Sobrescreve a transição suave padrão para algo mais agressivo se quiser, 
+               mas faremos isso via JS style injection para controle */
+        }
+
+        /* 2. Indo embora de lado */
+        .duck-container.rage-leave {
+            transform: translateX(300%) scale(3.5) !important; /* Sai da tela pela direita */
+            transition: transform 0.8s ease-in !important; /* Sai rápido */
+        }
+
         .duck-svg {
             width: 100%;
             height: 100%;
@@ -165,9 +239,95 @@
         .duck-body { fill: var(--accent); }
         .duck-wing { fill: #FDCB6E; filter: brightness(0.9); }
         .duck-beak { fill: #FF7675; }
-        .duck-eye { fill: #2D3436; }
+        .duck-eye { fill: #2D3436; transition: fill 0.3s; }
         .duck-eye-white { fill: white; }
         .duck-leg { fill: #FF7675; }
+
+        /* Elementos Faciais Extras (Inicialmente invisíveis) */
+        .duck-eyebrow {
+            stroke: #2D3436;
+            stroke-width: 4;
+            stroke-linecap: round;
+            fill: none;
+            opacity: 0;
+            transition: opacity 0.3s, transform 0.3s;
+            transform-origin: center;
+        }
+
+        .duck-bags { /* Olheiras */
+            stroke: rgba(0,0,0,0.2);
+            stroke-width: 2;
+            fill: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .duck-vein { /* Veia na testa */
+            stroke: #d63031;
+            stroke-width: 3;
+            fill: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .duck-sweat { /* Gota de suor */
+            fill: #74b9ff;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        /* --- ESTADOS DE IRRITAÇÃO DO PATO --- */
+
+        /* Nível 1: Incomodado */
+        .duck-container.stage-1 .duck-eyebrow {
+            opacity: 1;
+            transform: translateY(2px) rotate(10deg);
+        }
+
+        /* Nível 2: Irritado/Cansado */
+        .duck-container.stage-2 .duck-eyebrow {
+            opacity: 1;
+            transform: translateY(5px) rotate(25deg);
+        }
+        .duck-container.stage-2 .duck-eye {
+            fill: #d63031; /* Olho vermelho */
+        }
+        .duck-container.stage-2 .duck-bags {
+            opacity: 1;
+        }
+
+        /* Nível 3: Furioso/Exausto */
+        .duck-container.stage-3 .duck-eyebrow {
+            opacity: 1;
+            transform: translateY(6px) rotate(35deg);
+        }
+        .duck-container.stage-3 .duck-eye {
+            fill: #b71540;
+            animation: eye-twitch 0.2s infinite; /* Olho tremendo */
+        }
+        .duck-container.stage-3 .duck-bags {
+            opacity: 1;
+            stroke: rgba(0,0,0,0.4);
+        }
+        .duck-container.stage-3 .duck-vein {
+            opacity: 1;
+            animation: vein-pulse 1s infinite;
+        }
+        .duck-container.stage-3 .duck-sweat {
+            opacity: 1;
+        }
+
+        @keyframes eye-twitch {
+            0% { transform: translate(0, 0); }
+            50% { transform: translate(1px, 1px); }
+            100% { transform: translate(0, 0); }
+        }
+
+        @keyframes vein-pulse {
+            0% { stroke-width: 2; opacity: 0.7; }
+            50% { stroke-width: 4; opacity: 1; }
+            100% { stroke-width: 2; opacity: 0.7; }
+        }
 
         /* Animação do Pato Respirando/Flutuando */
         .duck-group {
@@ -182,17 +342,18 @@
             right: -140px;
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
-            padding: 20px 30px;
+            padding: 25px 30px;
             border-radius: 20px;
             border: 1px solid rgba(255, 255, 255, 0.2);
             box-shadow: 0 10px 40px rgba(0,0,0,0.2);
             color: #2D3436;
-            width: 280px;
+            width: 320px;
             opacity: 0;
             transform: scale(0.8) rotate(-10deg);
             transform-origin: bottom left;
             transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
             transition-delay: 1.6s; /* Espera o pato subir */
+            pointer-events: auto;
         }
 
         .message-card.show {
@@ -214,6 +375,15 @@
             font-weight: 800;
             color: #2D3436;
             line-height: 1.1;
+            margin-bottom: 15px;
+        }
+
+        .name-display {
+            display: block;
+            font-size: 0.6em;
+            color: #636e72;
+            margin-bottom: 4px;
+            font-weight: 600;
         }
         
         .banana-icon {
@@ -237,6 +407,7 @@
         /* --- Utilities --- */
         .hidden { display: none !important; }
         .fade-out { opacity: 0; pointer-events: none; transition: opacity 0.5s ease; }
+        .fade-in { opacity: 1; pointer-events: auto; transition: opacity 0.5s ease; }
 
         @keyframes fadeUp {
             to { opacity: 1; transform: translateY(0); }
@@ -251,6 +422,13 @@
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-5px); }
         }
+        
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
 
         /* Responsividade */
         @media (max-width: 600px) {
@@ -258,9 +436,9 @@
             .message-card {
                 right: auto;
                 left: 50%;
-                top: -120px;
+                top: -160px;
                 transform: translateX(-50%) scale(0.8);
-                width: 250px;
+                width: 280px;
             }
             .message-card.show {
                 transform: translateX(-50%) scale(1);
@@ -279,6 +457,9 @@
         <div id="intro-screen">
             <h1>O Algoritmo da Verdade</h1>
             <p class="subtitle">Utilizando redes neurais para analisar sua aura digital.</p>
+            
+            <input type="text" id="user-name" class="name-input" placeholder="Digite seu nome..." autocomplete="off">
+            
             <button class="btn-main" onclick="iniciarAnalise()">Descobrir Minha Essência</button>
         </div>
 
@@ -313,6 +494,19 @@
                     <circle class="duck-eye" cx="115" cy="90" r="6" />
                     <circle class="duck-eye-white" cx="117" cy="88" r="2" />
                     
+                    <!-- Elementos de Expressão (Invisíveis por padrão) -->
+                    <!-- Sobrancelha de Julgamento -->
+                    <path class="duck-eyebrow" d="M105 82 L125 82" />
+                    
+                    <!-- Olheiras de Cansaço -->
+                    <path class="duck-bags" d="M108 96 Q115 102 122 96" />
+                    
+                    <!-- Veia de Estresse -->
+                    <path class="duck-vein" d="M80 70 L90 75 L85 85" />
+                    
+                    <!-- Gota de Suor -->
+                    <path class="duck-sweat" d="M65 100 Q65 95 70 100 Q75 110 65 110 Q55 110 60 100" />
+                    
                     <!-- Asa -->
                     <path class="duck-wing" d="M60 170 Q100 140 130 170 Q100 210 60 170" />
                     
@@ -325,23 +519,47 @@
             <div class="message-card" id="message-card">
                 <h2>Resultado da Análise</h2>
                 <div class="verdict">
-                    Você é um<br>
-                    <span style="color: #6C5CE7;">BANANA</span>
-                    <span class="banana-icon">🍌</span>
+                    <!-- Conteúdo inserido via JS -->
                 </div>
+                <button class="btn-retry" onclick="reiniciar()">Isso não é verdade, faça de novo</button>
             </div>
         </div>
     </div>
 
     <script>
         // --- Lógica de Estado e Animação ---
+        let userName = "";
         
+        // Memória do Troll
+        let lastUserName = "";
+        let lastResultIndex = -1;
+        let retryCount = 0; // O contador de teimosia
+
         function iniciarAnalise() {
             const intro = document.getElementById('intro-screen');
             const loader = document.getElementById('loading-screen');
             const progress = document.getElementById('progress-fill');
             const status = document.getElementById('status-text');
-            const btn = document.querySelector('.btn-main');
+            const nameInput = document.getElementById('user-name');
+
+            // Validação simples
+            userName = nameInput.value.trim();
+            if (!userName) {
+                nameInput.classList.add('shake');
+                nameInput.focus();
+                setTimeout(() => nameInput.classList.remove('shake'), 500);
+                return;
+            }
+
+            // Lógica de Retries Progressiva (Escalada de Bullying)
+            if (lastUserName !== "" && userName.toLowerCase() === lastUserName.toLowerCase()) {
+                retryCount++;
+            } else {
+                // Se mudou o nome, reseta tudo
+                retryCount = 0;
+                lastUserName = userName; 
+                lastResultIndex = -1; // Libera novo sorteio se mudar o nome
+            }
 
             // 1. Fade out da intro
             intro.classList.add('fade-out');
@@ -349,9 +567,12 @@
             setTimeout(() => {
                 intro.style.display = 'none';
                 loader.style.display = 'flex';
+                // Remove classe fade-out se tiver (do reset)
+                loader.classList.remove('fade-out');
+                progress.style.width = '0%';
                 
-                // 2. Simulação de processamento complexo
-                simularCarregamento(progress, status, () => {
+                // 2. Simulação de processamento
+                simularCarregamento(progress, status, retryCount, () => {
                     // 3. Fim do carregamento, mostrar o pato
                     loader.classList.add('fade-out');
                     setTimeout(() => {
@@ -362,15 +583,135 @@
             }, 500);
         }
 
-        function simularCarregamento(bar, textEl, callback) {
+        function reiniciar() {
+            // Esconde o pato e o card
+            const stage = document.getElementById('reveal-stage');
+            const duck = document.getElementById('duck');
+            const card = document.getElementById('message-card');
+            const intro = document.getElementById('intro-screen');
+            
+            // Remove classes especiais
+            card.classList.remove('show');
+            duck.classList.remove('active');
+            duck.classList.remove('rage-zoom');
+            duck.classList.remove('rage-leave');
+            duck.style.transition = ""; // Reseta transição inline
+            
+            // Remove classes de irritação ao sair (serão reaplicadas ao voltar se necessário)
+            // Mas visualmente é melhor resetar só quando revelar de novo pra não "pular"
+            
+            setTimeout(() => {
+                stage.style.display = 'none';
+                intro.style.display = 'block';
+                // Pequeno delay para permitir a animação de fade in
+                requestAnimationFrame(() => {
+                    intro.classList.remove('fade-out');
+                });
+            }, 500);
+        }
+
+        function simularCarregamento(bar, textEl, count, callback) {
             let width = 0;
-            const steps = [
-                { w: 20, t: "Calibrando sensores..." },
-                { w: 45, t: "Escaneando histórico de decisões..." },
-                { w: 60, t: "Detectando níveis de potássio..." },
-                { w: 80, t: "Compilando veredito..." },
-                { w: 100, t: "Análise concluída." }
+            let steps = [];
+
+            // --- Gerador de "Trocadilhos" e Frases com o Nome (Base Expandida - 100+ variações) ---
+            const frasesComNome = [
+                `Verificando se "${userName}" rima com "problema"...`,
+                `Consultando a capivara de ${userName}...`,
+                `Tentando entender o que ${userName} tem na cabeça...`,
+                `Calculando o QI de ${userName} (buscando lupa)...`,
+                `Traduzindo "${userName}" para o idioma dos patos...`,
+                `Analisando a aura de ${userName}... (tá meio cinza)`,
+                `Descobrindo por que ${userName} clicou nisso...`,
+                `Escaneando as redes sociais de ${userName}... (que vergonha)`,
+                `Comparando ${userName} com uma batata...`,
+                `Acessando o histórico de ${userName}... (meus olhos!)`,
+                `Perguntando aos astros sobre ${userName}... (eles riram)`,
+                `Verificando se ${userName} é um robô (provavelmente não, robôs são espertos)`,
+                `Medindo a densidade óssea da cabeça de ${userName}...`,
+                `Tentando encontrar um pensamento lógico em ${userName}...`,
+                `Analisando a coordenação motora de ${userName}...`,
+                `Contando quantas vezes ${userName} piscou (0 vezes, que medo)...`,
+                `Baixando a ficha criminal de ${userName} no jardim de infância...`,
+                `Perguntando pro ChatGPT o que há de errado com ${userName}...`,
+                `Verificando se ${userName} sabe descascar laranja...`,
+                `Analisando o gosto musical duvidoso de ${userName}...`,
+                `Tentando não julgar ${userName} (falhando miseravelmente)...`,
+                `Procurando a graça na vida de ${userName}... (erro 404)`,
+                `Calculando quanto tempo ${userName} perde na internet...`,
+                `Detectando vácuo absoluto entre as orelhas de ${userName}...`,
+                `Comparando a beleza de ${userName} com um ornitorrinco...`,
+                `Verificando se ${userName} foi trocado na maternidade...`,
+                `Analisando a postura de camarão de ${userName}...`,
+                `Lendo a mente de ${userName}... (está em branco)`,
+                `Consultando os universitários sobre o caso de ${userName}...`,
+                `Verificando se ${userName} acredita em Terra Plana...`,
+                `Medindo o nível de teimosia de ${userName}... (infinito)`,
+                `Procurando a dignidade de ${userName}... (não encontrada)`,
+                `Simulando como ${userName} seria se fosse inteligente...`,
+                `Verificando se ${userName} coloca feijão por baixo do arroz...`,
+                `Analisando as escolhas de vida de ${userName}... (trágico)`,
+                `Tentando achar um talento em ${userName}... (ainda procurando)`,
+                `Calculando a chance de ${userName} tropeçar hoje... (99%)`,
+                `Verificando se ${userName} fala "iogurte" ou "io-gurt"...`,
+                `Acessando memórias constrangedoras de ${userName}...`,
+                `Rastreando a última vez que ${userName} fez algo útil...`,
+                `Comparando ${userName} com uma porta (a porta venceu)...`,
+                `Verificando se ${userName} lava atrás da orelha...`,
+                `Analisando o karma de ${userName}... (está negativado)`,
+                `Procurando o botão de "desligar" em ${userName}...`,
+                `Verificando se ${userName} já comeu cola na escola...`,
+                `Calculando o prejuízo que ${userName} dá pra sociedade...`,
+                `Analisando a caligrafia de médico de ${userName}...`,
+                `Verificando se ${userName} é parente do Patolino...`,
+                `Tentando explicar física quântica para ${userName}... (desisti)`,
+                `Verificando se ${userName} sabe fritar ovo sem queimar...`
             ];
+
+            // Pega 2 frases aleatórias diferentes
+            const f1 = frasesComNome[Math.floor(Math.random() * frasesComNome.length)];
+            let f2 = frasesComNome[Math.floor(Math.random() * frasesComNome.length)];
+            while (f1 === f2) {
+                f2 = frasesComNome[Math.floor(Math.random() * frasesComNome.length)];
+            }
+
+            if (count === 0) {
+                // NORMAL
+                steps = [
+                    { w: 15, t: `Iniciando dossiê sobre ${userName}...` },
+                    { w: 40, t: f1 },
+                    { w: 65, t: "Detectando níveis críticos de lerdeza..." },
+                    { w: 85, t: f2 },
+                    { w: 100, t: "Veredito pronto. Se prepare." }
+                ];
+            } else if (count === 1) {
+                // TROLL LEVE
+                steps = [
+                    { w: 10, t: `Lá vem o(a) ${userName} de novo...` },
+                    { w: 30, t: `Tentando mudar o destino de ${userName}...` },
+                    { w: 60, t: "Subornando o algoritmo (falha)..." },
+                    { w: 85, t: "Reutilizando análise anterior..." },
+                    { w: 100, t: "Nada mudou, sinto muito." }
+                ];
+            } else if (count === 2) {
+                // TROLL MÉDIO
+                steps = [
+                    { w: 10, t: "Sério? De novo?" },
+                    { w: 40, t: `O nome ${userName} significa "Teimosia" em grego?` },
+                    { w: 70, t: "Reciclando pixels..." },
+                    { w: 90, t: "Gastando energia à toa..." },
+                    { w: 100, t: "Lá vai..." }
+                ];
+            } else {
+                // TROLL PESADO
+                steps = [
+                    { w: 10, t: "PELO AMOR DE DEUS..." },
+                    { w: 40, t: `${userName.toUpperCase()}, PARE AGORA!` },
+                    { w: 60, t: "Vou chamar a polícia da internet..." },
+                    { w: 80, t: "Gerando insulto aleatório..." },
+                    { w: 100, t: "TOMA!" }
+                ];
+            }
 
             let stepIndex = 0;
 
@@ -379,35 +720,339 @@
                     clearInterval(interval);
                     setTimeout(callback, 500);
                 } else {
-                    // Lógica para avançar de forma não linear
                     if (stepIndex < steps.length && width >= steps[stepIndex].w) {
                         textEl.innerText = steps[stepIndex].t;
                         stepIndex++;
                     }
-                    width += Math.random() * 2;
+                    width += Math.random() * 1.5; 
                     if(width > 100) width = 100;
                     bar.style.width = width + '%';
                 }
-            }, 50);
+            }, 60);
         }
 
         function revelarPato() {
             const stage = document.getElementById('reveal-stage');
-            const duck = document.getElementById('duck');
+            const duckContainer = document.getElementById('duck');
             const card = document.getElementById('message-card');
             
+            // --- ATUALIZAÇÃO DO PATO: SISTEMA DE EXPRESSÕES ---
+            // Remove classes antigas
+            duckContainer.classList.remove('stage-1', 'stage-2', 'stage-3');
+            
+            // Adiciona classe baseada na insistência
+            if (retryCount >= 3) {
+                duckContainer.classList.add('stage-3');
+            } else if (retryCount === 2) {
+                duckContainer.classList.add('stage-2');
+            } else if (retryCount === 1) {
+                duckContainer.classList.add('stage-1');
+            }
+            
+            // Formatar nome e adicionar apelidos se for teimoso
+            let displayName = userName.charAt(0).toUpperCase() + userName.slice(1);
+            
+            // Apelidos carinhosos para insistentes
+            if (retryCount >= 2) {
+                const adjetivos = ["(o Teimoso)", "(o Insistente)", "(o Chato)", "(o Inconformado)", "(o Sem Noção)", "(o Mala)", "(o Chiclete)"];
+                const indiceAdj = Math.min(retryCount - 2, adjetivos.length - 1);
+                displayName += " " + adjetivos[indiceAdj];
+            }
+
+            const prefix = `<span class="name-display">${displayName}, a verdade é que:</span>`;
+
+            // --- BANCO DE DADOS GIGANTESCO (VERSÃO 4.0 - SEM REPETIÇÕES) ---
+            
+            const bananaReasons = [
+                "Você tem a coluna vertebral de uma gelatina de potássio.",
+                "Se a vida te dá limões, você troca por bananas porque é mais fácil mastigar.",
+                "Sua atitude é tão firme quanto uma casca pisada no asfalto quente.",
+                "Você não toma decisões, você apenas amadurece e espera alguém te comer.",
+                "Sua árvore genealógica é uma bananeira: muita sombra e nenhuma ação.",
+                "Você é rico em vitaminas, mas pobre em coragem.",
+                "Todo mundo te descasca com uma facilidade humilhante.",
+                "Você começa verde de inveja e termina preto de tanto apanhar da vida.",
+                "Sua rigidez moral dura menos que banana fora da geladeira.",
+                "Você é o ingrediente principal da vitamina da covardia.",
+                "Seu habitat natural é a fruteira da inércia.",
+                "Você é inofensivo, curvo e fácil de manipular.",
+                "Potássio alto, dignidade no chão.",
+                "Você escorrega nas próprias decisões erradas.",
+                "Até os macacos do zoológico te acham fácil demais.",
+                "Você foi feito para ser amassado com aveia e mel.",
+                "Sua casca protege um interior mole e sem fibra.",
+                "Você vive em cacho porque morre de medo de ficar sozinho.",
+                "Sua biografia poderia ser escrita numa casca jogada no lixo.",
+                "Você é tão ameaçador quanto uma arma de brinquedo amarela.",
+                "Seu superpoder é atrair moscas de fruta (problemas pequenos).",
+                "Você é doce, mas enjoa rápido.",
+                "Sua consistência emocional é de mingau.",
+                "Você é a fruta oficial da procrastinação.",
+                "Seu destino é virar doce, porque como fruta in natura já falhou.",
+                "Você não enfrenta o problema, você cria pintinhas marrons e desiste.",
+                "Você amadurece e apodrece no mesmo dia.",
+                "Sua firmeza é lendária... por durar 5 minutos.",
+                "Você é o tipo que cai na própria casca.",
+                "Sua casca é amarela para combinar com seu medo.",
+                "Você é mole demais para este mundo crocante.",
+                "Sua vida é um eterno 'vou ver e te aviso'.",
+                "Você dobra com o vento, literalmente.",
+                "Seu espírito animal é uma salada de frutas passadas.",
+                "Você é a sobremesa que ninguém pediu.",
+                "Sua casca brilha, mas por dentro é só decepção.",
+                "Você é mais mole que sopa de minhoca.",
+                "Você tem medo de escuro e de faca de manteiga.",
+                "Sua audácia é zero, seu potássio é dez.",
+                "Você é o rei do 'tanto faz'.",
+                "Sua iniciativa é comparável a uma planta de plástico.",
+                "Você espera a vida te descascar.",
+                "Você é a prova de que nem tudo que é ouro brilha (às vezes é só banana).",
+                "Você é macio demais para a selva de pedra.",
+                "Você não tem fibra, tem polpa.",
+                "Sua resistência à pressão é nula.",
+                "Você é o acompanhamento, nunca o prato principal.",
+                "Você é a fruta mais humilde (leia-se: sem autoestima).",
+                "Você se machuca até no transporte.",
+                "Sua validade expira assim que o problema chega.",
+                "Você é a definição botânica de 'tanto faz'."
+            ];
+
+            const bobaoReasons = [
+                "Sua aura digital tem o formato exato de um nariz de palhaço.",
+                "O algoritmo tentou ler sua mente e encontrou um macaco batendo pratos.",
+                "Seu QI briga diariamente para empatar com a temperatura ambiente.",
+                "Você ri de piadas que ninguém contou (e ri errado).",
+                "Sua bio do Tinder deveria ser 'buscando cérebro compatível'.",
+                "Foi detectado um vácuo absoluto onde deveria haver esperteza.",
+                "Você é o tipo de pessoa que empurra portas onde está escrito 'PUXE'.",
+                "Seu anjo da guarda bebe em serviço pra aguentar.",
+                "Você é a razão pela qual shampoo tem instruções de uso.",
+                "Sua sagacidade é comparável a uma porta entreaberta.",
+                "Você confundiu detergente com azeite ontem, admita.",
+                "Sua densidade intelectual flutua perigosamente no negativo.",
+                "Você acha que 'nuvem' é onde os anjos moram, não onde salvam arquivos.",
+                "Você perdeu o jogo da velha jogando sozinho.",
+                "Sua linha de raciocínio é um círculo vicioso de bobagens.",
+                "Se esperteza fosse água, você seria o deserto do Atacama.",
+                "Você é simpático, pena que a luz do teto não acende.",
+                "Tem alguém em casa aí dentro? O eco diz que não.",
+                "Sua complexidade mental cabe num post-it dobrado ao meio.",
+                "Você é um bobão modelo de fábrica, sem opcionais.",
+                "A NASA estuda seu cérebro em busca do vácuo perfeito.",
+                "Você é a vírgula errada na frase da vida.",
+                "Seu raciocínio é tão lento que viaja no tempo para o passado.",
+                "Você é fofo, mas cognitivamente desafiado.",
+                "O pato te olhou, suspirou e sentiu pena.",
+                "Você tenta dar zoom em fotos impressas.",
+                "Sua senha do banco deve ser 1234.",
+                "Você acredita que o 'M' do McDonald's é de 'Maria'.",
+                "Você já tentou secar gelo no sol.",
+                "Sua capacidade de foco é menor que a de um dory.",
+                "Você ri quando não entende (ou seja, ri o tempo todo).",
+                "Você é o amigo que todo mundo explica a piada depois.",
+                "Sua mente é um campo vasto... e vazio.",
+                "Você procura o celular usando a lanterna do celular.",
+                "Você tropeça em superfícies perfeitamente planas.",
+                "Sua lógica faria Aristóteles chorar no banho.",
+                "Você é a prova de que é possível viver no modo automático.",
+                "Sua sabedoria cabe num biscoito da sorte vazio.",
+                "Você é o bobo da corte do seu próprio reino.",
+                "Seu processador mental é um Pentium 2.",
+                "Você acha que Bluetooth é um dente azul.",
+                "Você pergunta 'que horas são?' olhando pro relógio.",
+                "Você é a personificação do meme 'confused math lady'.",
+                "Sua astúcia foi esquecida no útero.",
+                "Você é inocente demais para a maldade do mundo (e para a tabuada).",
+                "Você assopra sorvete pra esfriar.",
+                "Você é o 'café com leite' da vida adulta.",
+                "Sua mente é um livro em branco (com desenhos nas margens).",
+                "Você é feliz, e a ignorância é uma bênção.",
+                "Sua cota de genialidade acabou em 1999."
+            ];
+
+            const peixeReasons = [
+                "Sua memória RAM biológica dura exatos 3 segundos (igual a de um peixinho).",
+                "Você nada, nada e morre na praia toda vez (metaforicamente e nos jogos).",
+                "Você abre a geladeira e esquece o que foi buscar 5 vezes ao dia.",
+                "Sua boca vive aberta esperando a ração cair do céu.",
+                "Você cai em qualquer isca que a vida joga (inclusive spam de email).",
+                "Sua capacidade de foco é menor que a de um kinguio dourado.",
+                "Você vive num aquário mental e acha que é o oceano Atlântico.",
+                "Seus olhos estão abertos, mas o sinal não chega no Wi-Fi do cérebro.",
+                "Você se assusta com o próprio reflexo no vidro do carro.",
+                "Sua profundidade intelectual é de um pires com água da chuva.",
+                "Você nada em círculos e acha que está viajando o mundo.",
+                "Sua habilidade de comunicação se resume a 'blub blub'.",
+                "Você é ornamental: bonito de ver, inútil na prática.",
+                "Qualquer brilho te distrai por horas (olha, uma moeda!).",
+                "Você morde o anzol mesmo vendo a linha e o pescador.",
+                "Sua vida é um eterno 'nadaremos, nadaremos' sem sair do lugar.",
+                "Você tem a personalidade vibrante de uma alga marinha.",
+                "Seu cérebro é composto por 90% água e 10% escamas.",
+                "Você é escorregadio quando confrontado com qualquer responsabilidade.",
+                "Sua atenção dura menos que um vídeo de 5 segundos do TikTok.",
+                "Você esqueceu o início desta frase antes de chegar ao ponto final.",
+                "Você é facilmente pescado por promoções de 'ganhe um iPhone grátis'.",
+                "Sua expressão facial padrão é um eterno 'hã?'.",
+                "Você vive na superfície porque tem medo de pensar fundo.",
+                "Você é um peixe fora d'água em qualquer situação social complexa.",
+                "Sua memória é tão ruim que cada dia é uma vida nova (o que é bom, talvez).",
+                "Você segue o cardume sem saber se estão indo pro abatedouro.",
+                "Sua vontade própria foi comida por um tubarão imaginário.",
+                "Você é frio, úmido e tem o carisma de uma pescada morta.",
+                "Glub glub glub (tradução: você não está entendendo nada, né?).",
+                "Você se perde dentro da própria casa.",
+                "Sua vida é boiar e esperar a correnteza levar.",
+                "Você tem o olhar de quem está processando o vácuo.",
+                "Você é a isca, nunca o pescador.",
+                "Sua intuição falha mais que previsão do tempo.",
+                "Você tem medo de redes (sociais e de pesca).",
+                "Você é o Nemo, mas sem o pai procurando.",
+                "Sua bolha de realidade é impenetrável.",
+                "Você respira embaixo d'água porque tem preguiça de subir.",
+                "Sua escama brilha, mas não vale ouro.",
+                "Você é o rei dos 'aquários' (escritórios pequenos).",
+                "Sua barbatana é mole.",
+                "Você foge de tubarões que nem existem.",
+                "Sua vida amorosa é um mar revolto.",
+                "Você é salgado demais para ser doce.",
+                "Você escorrega das mãos de quem tenta te ajudar.",
+                "Sua lógica é subaquática (ninguém ouve).",
+                "Você é o último a saber das coisas no oceano.",
+                "Sua bússola moral aponta pro fundo do mar.",
+                "Você é um bagre ensaboado."
+            ];
+
+            const patoReasons = [
+                "Você faz tudo (anda, nada, voa), mas faz tudo terrivelmente mal feito.",
+                "Seu andar desengonçado pela vida foi detectado pelo Google Earth.",
+                "Muito barulho (quack) e zero eficiência prática.",
+                "Você se acha um cisne majestoso, mas o espelho discorda.",
+                "Sua coordenação motora digital é lamentável (pare de teclar com as penas).",
+                "Você tenta voar e cai, tenta nadar e afunda, tenta andar e tropeça.",
+                "Sua vida é uma série ininterrupta de 'quacks' mal sucedidos.",
+                "Você tem penas, mas não tem voo (metaforicamente falando).",
+                "Você é o clínico geral do fracasso: sabe errar em todas as áreas.",
+                "Sua graça ao se mover é comparável a uma geladeira caindo da escada.",
+                "Você é barulhento sem motivo e incomoda os vizinhos do lago.",
+                "Você migra de problema em problema sem resolver absolutamente nenhum.",
+                "Sua autoimagem é de águia, sua realidade é de borracha amarela de banheira.",
+                "Você flutua na mediocridade com uma elegância duvidosa.",
+                "Você bica a mão de quem tenta te dar pão.",
+                "Sua cauda balança feliz, mas sua cabeça não processa a informação.",
+                "Você é a definição de 'pau pra toda obra' que quebra na primeira obra.",
+                "Você é um pato manco na maratona da existência humana.",
+                "Sua plumagem é bonita, mas não esconde a falta de talento real.",
+                "Você faz muito estardalhaço para chocar um ovo vazio.",
+                "Você acha que lidera a fila, mas está apenas fugindo do cozinheiro.",
+                "Seu nado sincronizado com a realidade está totalmente dessincronizado.",
+                "Você é fofo de longe, mas caótico e sujo de perto.",
+                "Sua dieta intelectual consiste em pão velho jogado por estranhos.",
+                "Você grasna verdades que ninguém perguntou e ninguém quer ouvir.",
+                "Você é o patinho feio que cresceu e continuou... exótico.",
+                "Sua estabilidade emocional é como um barco de papel num lago agitado.",
+                "Você molha os pés mas não tem coragem de mergulhar de cabeça.",
+                "Você é mestre em fazer bagunça na água parada da vida.",
+                "Quack quack (tradução: aceite sua natureza medíocre e seja feliz).",
+                "Você tem bico grande e atitude pequena.",
+                "Você anda rebolando, mas sem gingado.",
+                "Sua impermeabilidade a conselhos é notável.",
+                "Você voa em V, mas sempre na ponta errada.",
+                "Você é a ave mais confusa do reino animal.",
+                "Sua vida é um lago de incertezas.",
+                "Você grasna para a lua achando que é lobo.",
+                "Sua pata é larga para caber tanta desculpa.",
+                "Você é o Donald da vida real (sem a fama e o dinheiro).",
+                "Você perde penas a cada susto.",
+                "Sua orientação geográfica é baseada em migalhas.",
+                "Você é o alvo no tiro ao alvo da vida.",
+                "Sua lagoa está secando.",
+                "Você é o rei da grasnada inútil.",
+                "Sua majestade é de isopor.",
+                "Você é um ganso disfarçado de gente.",
+                "Sua elegância afundou junto com o Titanic.",
+                "Você é o pato da Fiesp (só ocupa espaço).",
+                "Sua vida é um gibi sem graça.",
+                "Você é a prova de que a evolução às vezes tira férias."
+            ];
+
+            const getReason = (list) => list[Math.floor(Math.random() * list.length)];
+
+            const reasonStyle = "font-size: 0.45em; line-height: 1.5; margin-top: 15px; color: #636e72; font-weight: 500; font-style: italic; border-top: 1px solid rgba(0,0,0,0.1); padding-top: 10px;";
+
+            // --- Seletor de Destino Aleatório ---
+            const opcoes = [
+                {
+                    html: `${prefix}Você é um<br><span style="color: #6C5CE7;">BANANA</span> <span class="banana-icon">🍌</span><div style="${reasonStyle}">Motivo: "${getReason(bananaReasons)}"</div>`
+                },
+                {
+                    html: `${prefix}Você é um<br><span style="color: #e17055;">BOBÃO</span> <span class="banana-icon">🤪</span><div style="${reasonStyle}">Motivo: "${getReason(bobaoReasons)}"</div>`
+                },
+                {
+                    html: `${prefix}Você é<br><span style="color: #0984e3;">LESADO IGUAL PEIXE</span> <span class="banana-icon">🐟</span><div style="${reasonStyle}">Motivo: "${getReason(peixeReasons)}"</div>`
+                },
+                {
+                    html: `${prefix}Você é um<br><span style="color: #FDCB6E;">PATO</span> <span class="banana-icon">🦆</span><div style="${reasonStyle}">Motivo: "${getReason(patoReasons)}"</div>`
+                }
+            ];
+
+            let indexEscolhido;
+
+            if (retryCount > 0 && lastResultIndex !== -1) {
+                // FORÇA O MESMO RESULTADO se for retry
+                indexEscolhido = lastResultIndex;
+            } else {
+                // SORTEIA NOVO se for nome novo
+                indexEscolhido = Math.floor(Math.random() * opcoes.length);
+                lastResultIndex = indexEscolhido;
+            }
+            
+            const sorteio = opcoes[indexEscolhido];
+            
+            // Injeta o resultado no cartão
+            document.querySelector('.verdict').innerHTML = sorteio.html;
+
             stage.style.display = 'block';
             
-            // Pequeno delay para renderizar
-            setTimeout(() => {
-                duck.classList.add('active');
+            // --- LÓGICA DE EXIBIÇÃO ---
+
+            if (retryCount >= 3) {
+                // === MODO RAGE QUIT (4ª Tentativa+) ===
                 
-                // Disparar confetes quando o cartão aparecer
+                // 1. Pato entra com cara de bravo
+                setTimeout(() => {
+                    duckContainer.classList.add('active'); 
+                }, 100);
+
+                // 2. Zoom na cara (Encarada agressiva)
+                setTimeout(() => {
+                    duckContainer.style.transition = "all 0.5s ease"; // Acelera o zoom
+                    duckContainer.classList.add('rage-zoom');
+                }, 1800);
+
+                // 3. Pato vai embora (Sai de lado)
+                setTimeout(() => {
+                    duckContainer.classList.add('rage-leave');
+                }, 4000); // Fica encarando por ~2.2s
+
+                // 4. Mostra o cartão "Bilhete de despedida"
                 setTimeout(() => {
                     card.classList.add('show');
                     triggerConfetti();
-                }, 1600);
-            }, 100);
+                }, 4500);
+
+            } else {
+                // === MODO NORMAL ===
+                setTimeout(() => {
+                    duckContainer.classList.add('active');
+                    
+                    // Disparar confetes quando o cartão aparecer
+                    setTimeout(() => {
+                        card.classList.add('show');
+                        triggerConfetti();
+                    }, 1600);
+                }, 100);
+            }
         }
 
         // --- Sistema de Partículas (Confetti) Minimalista ---
